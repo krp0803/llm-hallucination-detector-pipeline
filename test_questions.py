@@ -145,4 +145,13 @@ async def run_eval() -> None:
 if __name__ == "__main__":
     import asyncio
 
+    from dotenv import load_dotenv
+
+    # This is a direct entry point (`python test_questions.py`), so it
+    # loads its own env -- same rule as main.py: entry points configure
+    # the environment, library modules (agent.py, auditor.py) just
+    # consume it. Kept inside __main__, not at module top, so importing
+    # this file for its EVAL_QUESTIONS list elsewhere never has a side
+    # effect of touching the environment.
+    load_dotenv()
     asyncio.run(run_eval())

@@ -3,21 +3,25 @@ FastAPI entry point. Wires the two passes together: POST /ask runs the
 agent, then hands its output straight to the auditor, then returns both
 the raw and cleaned answers plus the full audit trail.
 
-Env vars (OPENAI_API_KEY, TAVILY_API_KEY) load once at import time via
-python-dotenv, before agent.py's module-level clients are constructed --
-load_dotenv() has to run first or those clients would initialize with
-missing keys.
+load_dotenv() runs here because this is an entry point: the rule for the
+whole project is that entry points configure the environment (this file,
+test_questions.py) and library modules just consume it (agent.py,
+auditor.py). agent.py's OpenAI/Tavily clients are constructed lazily on
+first use rather than at import time, so -- unlike in Stage 1 -- import
+order here no longer matters for correctness. load_dotenv() still goes
+first on principle: env should be loaded before anything downstream might
+read it.
 """
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
-from fastapi import FastAPI
+from fastapi import FastAPI  # noqa: E402
 
-from agent import run_agent
-from auditor import audit
-from models import AskRequest, AskResponse
+from agent import run_agent  # noqa: E402
+from auditor import audit  # noqa: E402
+from models import AskRequest, AskResponse  # noqa: E402
 
 app = FastAPI(
     title="Claim Auditor",
