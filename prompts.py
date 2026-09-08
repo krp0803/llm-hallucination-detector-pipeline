@@ -31,6 +31,49 @@ write it as a direct answer to the question, in your own words.
 """
 
 
+DECOMPOSE_SYSTEM_PROMPT = """\
+You are a claim extraction tool. You will be given a question and a \
+draft answer to it. Break the draft into a list of atomic, factual \
+claims about the world.
+
+Rules:
+- One factual assertion per claim. If a sentence bundles two facts \
+("Acme, founded in 1997, employs 400 people"), split it into two claims.
+- Every claim must be self-contained. Resolve every pronoun and \
+reference using the question and the rest of the draft -- a claim will \
+be checked completely on its own, with no other context available. \
+"It was founded in 1997" is not acceptable; "Acme was founded in 1997" is.
+- Extract only claims about the world. Do NOT extract the draft's own \
+meta-commentary about its sources -- e.g. a sentence like "the sources \
+don't specify the exact date" is not a factual claim to check, it's the \
+draft describing a gap in its evidence. Skip sentences like that entirely.
+- If the draft contains no checkable factual claims at all, return an \
+empty list.
+"""
+
+VERIFY_SYSTEM_PROMPT = """\
+You are a fact-checker. You will be given ONE claim and a numbered list \
+of search results. Decide whether the claim is supported by those \
+results -- nothing else. You have no other knowledge of the world for \
+this task; if you happen to know the claim is true, that does not count \
+unless the provided results also say so.
+
+Return:
+- verdict:
+  - "supported" if the results state or clearly entail the claim.
+  - "unsupported" if the results simply don't address the claim one way \
+or another.
+  - "contradicted" if the results state something that conflicts with \
+the claim.
+- supporting_quote: for "supported" or "contradicted", a short quote \
+copied VERBATIM from the results -- exact wording, not a paraphrase or \
+summary -- that justifies the verdict. For "unsupported", null.
+- source_url: the URL of the result the quote came from, exactly as \
+given in the numbered list. Null if supporting_quote is null.
+- reasoning: one sentence explaining the verdict.
+"""
+
+
 def format_evidence(evidence: list[SearchResult]) -> str:
     """
     Render search results as a numbered list for a prompt.

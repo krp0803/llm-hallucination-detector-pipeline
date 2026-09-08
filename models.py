@@ -82,6 +82,13 @@ class ClaimCheck(BaseModel):
     actually appears in the source text is falsifiable -- a later stage
     can mechanically substring-check it. It turns the auditor's opinion
     into a citation.
+
+    `quote_verified` is that mechanical check's result -- whether WE found
+    `supporting_quote` inside the evidence, independent of the model's own
+    verdict. It's not the model's self-report; a model asserting
+    SUPPORTED with a quote that doesn't actually appear anywhere in the
+    evidence gets `quote_verified=False` here, which is exactly the case
+    this field exists to catch.
     """
 
     claim: str
@@ -89,6 +96,7 @@ class ClaimCheck(BaseModel):
     supporting_quote: str | None
     reasoning: str
     source_url: str | None
+    quote_verified: bool
 
 
 class AuditReport(BaseModel):
