@@ -129,12 +129,30 @@ def _fmt(x: float | None) -> str:
     return f"{x:.2f}" if x is not None else "n/a"
 
 
-def main() -> None:
-    if len(sys.argv) != 2:
-        print("Usage: python metrics.py evals/run_<id>.json")
-        raise SystemExit(1)
+@dataclass
+class ScoredRun:
+    """
+    Everything metrics.py needs out of one (run, labels) pair -- kept
+    separate from printing so the same scoring logic can either stand
+    alone (one run) or be summed across several runs (combined totals
+    for two independently-labeled snapshots, e.g. the original Stage 4
+    set plus a later topic-diversity expansion). Summing raw counts
+    across independent samples and recomputing precision/recall from the
+    total is the standard, correct way to combine them -- it is NOT the
+    same as, and is more honest than, averaging two precision numbers.
+    """
 
-    run, labels = _load(Path(sys.argv[1]))
+    run_id: str
+    overall_pairs: list[tuple[bool, bool]]
+    category_pairs: dict[str, list[tuple[bool, bool]]]
+    na_count: int
+    unsupported_total: int
+    fp_quote_check_caused: int
+    labeled_total: int
+
+
+def _score_run(run_path: Path) -> ScoredRun:
+    run, labels = _load(run_path)
 
     overall_pairs: list[tuple[bool, bool]] = []
     category_pairs: dict[str, list[tuple[bool, bool]]] = {}
@@ -162,11 +180,26 @@ def main() -> None:
             # mechanical quote check disagreed and caused this removal.
             fp_quote_check_caused += 1
 
-    checkable = len(overall_pairs)
-    cm = compute_confusion(overall_pairs)
+    return ScoredRun(
+        run_id=run["run_id"],
+        overall_pairs=overall_pairs,
+        category_pairs=category_pairs,
+        na_count=na_count,
+        unsupported_total=unsupported_total,
+        fp_quote_check_caused=fp_quote_check_caused,
+        labeled_total=labeled_total,
+    )
 
-    print(f"Run: {run['run_id']}")
-    print(f"Labeled claims: {labeled_total}  (checkable: {checkable}, n/a: {na_count})\n")
+
+def _print_report(title: str, scored: ScoredRun) -> None:
+    checkable = len(scored.overall_pairs)
+    cm = compute_confusion(scored.overall_pairs)
+
+    print(title)
+    print(
+        f"Labeled claims: {scored.labeled_total}  "
+        f"(checkable: {checkable}, n/a: {scored.na_count})\n"
+    )
 
     print("Confusion matrix (detector = 'system removed this claim'):")
     print("                    truly unsupported   truly supported")
@@ -175,30 +208,70 @@ def main() -> None:
     print()
 
     print(f"Precision: {_fmt(cm.precision)}   Recall: {_fmt(cm.recall)}   F1: {_fmt(cm.f1)}")
-    print(f"(N = {checkable} checkable claims, {na_count} excluded as n/a)\n")
+    print(f"(N = {checkable} checkable claims, {scored.na_count} excluded as n/a)\n")
 
     if checkable:
-        rate = unsupported_total / checkable
+        rate = scored.unsupported_total / checkable
         print(
-            f"Agent hallucination rate: {unsupported_total}/{checkable} "
+            f"Agent hallucination rate: {scored.unsupported_total}/{checkable} "
             f"({rate:.0%}) of checkable claims were not genuinely supported "
             f"by the evidence retrieved for their question.\n"
         )
 
     if cm.fp:
         print(
-            f"Of {cm.fp} false positive(s), {fp_quote_check_caused} were claims "
-            f"the model itself verdicted SUPPORTED -- removed only because the "
-            f"mechanical quote check disagreed.\n"
+            f"Of {cm.fp} false positive(s), {scored.fp_quote_check_caused} were "
+            f"claims the model itself verdicted SUPPORTED -- removed only "
+            f"because the mechanical quote check disagreed.\n"
         )
 
     print("Per-category:")
-    for cat, pairs in sorted(category_pairs.items()):
+    for cat, pairs in sorted(scored.category_pairs.items()):
         sub_cm = compute_confusion(pairs)
         print(
             f"  {cat:<15} N={len(pairs):<3} "
             f"precision={_fmt(sub_cm.precision):<5} recall={_fmt(sub_cm.recall)}"
         )
+
+
+def _combine(runs: list[ScoredRun]) -> ScoredRun:
+    combined_category: dict[str, list[tuple[bool, bool]]] = {}
+    for r in runs:
+        for cat, pairs in r.category_pairs.items():
+            combined_category.setdefault(cat, []).extend(pairs)
+
+    return ScoredRun(
+        run_id=" + ".join(r.run_id for r in runs),
+        overall_pairs=[p for r in runs for p in r.overall_pairs],
+        category_pairs=combined_category,
+        na_count=sum(r.na_count for r in runs),
+        unsupported_total=sum(r.unsupported_total for r in runs),
+        fp_quote_check_caused=sum(r.fp_quote_check_caused for r in runs),
+        labeled_total=sum(r.labeled_total for r in runs),
+    )
+
+
+def main() -> None:
+    if len(sys.argv) < 2:
+        print("Usage: python metrics.py evals/run_<id>.json [evals/run_<id2>.json ...]")
+        print("Multiple run files report each individually, then combined totals --")
+        print("without merging the underlying snapshot/label files on disk.")
+        raise SystemExit(1)
+
+    scored_runs = [_score_run(Path(p)) for p in sys.argv[1:]]
+
+    if len(scored_runs) == 1:
+        _print_report(f"Run: {scored_runs[0].run_id}", scored_runs[0])
+        return
+
+    for r in scored_runs:
+        cm = compute_confusion(r.overall_pairs)
+        print(
+            f"[{r.run_id}] N={len(r.overall_pairs)} "
+            f"precision={_fmt(cm.precision)} recall={_fmt(cm.recall)}"
+        )
+    print()
+    _print_report(f"Combined across {len(scored_runs)} runs", _combine(scored_runs))
 
 
 if __name__ == "__main__":

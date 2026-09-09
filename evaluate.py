@@ -111,13 +111,16 @@ def main() -> None:
     parser.add_argument(
         "--question",
         type=int,
+        nargs="+",
         default=None,
-        help="Run only the question at this index (0-based) in EVAL_QUESTIONS.",
+        help="Run only the question(s) at these indices (0-based) in "
+        "EVAL_QUESTIONS, e.g. --question 10 11 12. All land in one run "
+        "artifact together.",
     )
     args = parser.parse_args()
 
     if args.question is not None:
-        questions = [EVAL_QUESTIONS[args.question]]
+        questions = [EVAL_QUESTIONS[i] for i in args.question]
     elif args.limit is not None:
         questions = EVAL_QUESTIONS[: args.limit]
     else:

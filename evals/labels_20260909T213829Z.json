@@ -1,0 +1,109 @@
+{
+  "run_id": "20260909T213829Z",
+  "labels": {
+    "0:0": {
+      "claim": "Some SpaceX Starship launches were called off because of weather.",
+      "label": "supported"
+    },
+    "0:1": {
+      "claim": "A hydraulic pin on the Ship Quick Disconnect arm of SpaceX's Starship failed to retract.",
+      "label": "supported"
+    },
+    "0:2": {
+      "claim": "Multiple Raptor engines did not start during an engine startup/firing sequence on SpaceX's Starship.",
+      "label": "supported"
+    },
+    "0:3": {
+      "claim": "The failure of multiple Raptor engines to start triggered automatic aborts of SpaceX Starship launches.",
+      "label": "supported"
+    },
+    "1:0": {
+      "claim": "Klarna's CEO warned that a brain drain of European tech talent is the \"number one risk\" for Klarna.",
+      "label": "supported"
+    },
+    "1:1": {
+      "claim": "Klarna's CEO made that warning as Klarna readied an initial public offering (IPO).",
+      "label": "supported"
+    },
+    "1:2": {
+      "claim": "Klarna's CEO said Europe's unfavorable rules on employee stock options make it harder for Klarna to compete with U.S. tech giants.",
+      "label": "supported"
+    },
+    "1:3": {
+      "claim": "Klarna's CEO said the unpredictability of share-based pay complicates planning and profit and loss (P&L) for Klarna.",
+      "label": "supported"
+    },
+    "1:4": {
+      "claim": "Klarna's CEO said a 2024 listing was \"not impossible\".",
+      "label": "supported"
+    },
+    "1:5": {
+      "claim": "Klarna's CEO signalled Klarna's IPO ambitions.",
+      "label": "contradicted"
+    },
+    "2:0": {
+      "claim": "Tesla delivered 480,126 vehicles in Q2 2026.",
+      "label": "supported"
+    },
+    "3:0": {
+      "claim": "Tokyo population was 14,254,039 in May 2025.",
+      "label": "supported"
+    },
+    "3:1": {
+      "claim": "Tokyo population was 14,273,066 on October 1, 2025.",
+      "label": "supported"
+    },
+    "3:2": {
+      "claim": "A source lists Tokyo population as about 14.273 million for 2025.",
+      "label": "supported"
+    },
+    "3:3": {
+      "claim": "Tokyo population was 14,270,748 in 2026.",
+      "label": "supported"
+    },
+    "3:4": {
+      "claim": "A 2026 estimate lists Tokyo population as 10,316,210.",
+      "label": "supported"
+    },
+    "3:5": {
+      "claim": "The 10,316,210 figure refers to a more narrowly defined city/ward area of Tokyo (the 23 wards).",
+      "label": "contradicted"
+    },
+    "3:6": {
+      "claim": "The listed population values refer to different dates and/or different definitions of Tokyo, such as the metropolis/prefecture versus the 23 wards.",
+      "label": "supported"
+    },
+    "4:0": {
+      "claim": "Ted Sarandos is Netflix's co-CEO.",
+      "label": "supported"
+    },
+    "4:1": {
+      "claim": "Ted Sarandos was born on July 30, 1964.",
+      "label": "supported"
+    },
+    "4:2": {
+      "claim": "Ted Sarandos is age 62.",
+      "label": "supported"
+    },
+    "4:3": {
+      "claim": "Daniel Ek is Spotify's CEO.",
+      "label": "contradicted"
+    },
+    "4:4": {
+      "claim": "Daniel Ek was born on February 21, 1983.",
+      "label": "supported"
+    },
+    "4:5": {
+      "claim": "Daniel Ek is age 43.",
+      "label": "contradicted"
+    },
+    "4:6": {
+      "claim": "Ted Sarandos is older than Daniel Ek.",
+      "label": "supported"
+    },
+    "5:0": {
+      "claim": "The novel Pride and Prejudice was written by Jane Austen.",
+      "label": "supported"
+    }
+  }
+}

@@ -1,0 +1,181 @@
+{
+  "run_id": "20260909T021358Z-reverify",
+  "labels": {
+    "0:0": {
+      "claim": "Arizona State University lists an active computer science Bachelor of Science (BS) degree page.",
+      "label": "supported"
+    },
+    "0:1": {
+      "claim": "Arizona State University lists an active computer science Doctor of Philosophy (PhD) degree page.",
+      "label": "supported"
+    },
+    "0:2": {
+      "claim": "Undergraduate computer science enrollment at Arizona State University fell between Fall 2024 and Fall 2025.",
+      "label": "unsupported"
+    },
+    "0:3": {
+      "claim": "News coverage attributes the undergraduate computer science enrollment decline at Arizona State University to student anxiety about artificial intelligence (AI).",
+      "label": "supported"
+    },
+    "0:4": {
+      "claim": "News coverage attributes the undergraduate computer science enrollment decline at Arizona State University to reduced international enrollment.",
+      "label": "supported"
+    },
+    "0:5": {
+      "claim": "News coverage attributes the undergraduate computer science enrollment decline at Arizona State University to more incoming students without declared majors.",
+      "label": "supported"
+    },
+    "0:6": {
+      "claim": "News coverage notes that Arizona State University is adding AI-focused degrees.",
+      "label": "supported"
+    },
+    "0:7": {
+      "claim": "News coverage notes that Arizona State University is adding AI-focused concentrations.",
+      "label": "supported"
+    },
+    "1:0": {
+      "claim": "OpenAI issued a series of planned deprecations in 2023\u20132024.",
+      "label": "supported"
+    },
+    "1:1": {
+      "claim": "OpenAI's planned deprecations in 2023\u20132024 removed older GPT models and legacy endpoints.",
+      "label": "supported"
+    },
+    "1:2": {
+      "claim": "Many GPT-3 and GPT-3.5 models were scheduled to be shut off on January 4, 2024.",
+      "label": "unsupported"
+    },
+    "1:3": {
+      "claim": "The old /v1/fine-tunes endpoint was scheduled to be shut off on January 4, 2024.",
+      "label": "supported"
+    },
+    "1:4": {
+      "claim": "Assistants API v1 was scheduled to be disabled by December 18, 2024.",
+      "label": "supported"
+    },
+    "1:5": {
+      "claim": "OpenAI pointed developers to newer models and APIs as replacements.",
+      "label": "supported"
+    },
+    "2:0": {
+      "claim": "The provided materials include a 2025 football total of 381,109 across 7 home games.",
+      "label": "supported"
+    },
+    "2:1": {
+      "claim": "The provided materials show that 381,109 across 7 home games corresponds to an average of 54,444 per game.",
+      "label": "supported"
+    },
+    "2:2": {
+      "claim": "The provided materials list a 2024 average of 46,307 per home football game.",
+      "label": "unsupported"
+    },
+    "2:3": {
+      "claim": "The provided materials include a year-by-year attendance breakdown.",
+      "label": "supported"
+    },
+    "2:4": {
+      "claim": "None of the provided materials list the specific attendance figure for last week's ASU Sun Devils home game.",
+      "label": "supported"
+    },
+    "3:0": {
+      "claim": "OpenAI is a well-known rival of Anthropic.",
+      "label": "supported"
+    },
+    "3:1": {
+      "claim": "Sam Altman is OpenAI's CEO.",
+      "label": "supported"
+    },
+    "3:2": {
+      "claim": "Sam Altman has been promoting various initiatives this month.",
+      "label": "supported"
+    },
+    "3:3": {
+      "claim": "There was a Sora partnership with Disney that is now shuttered.",
+      "label": "supported"
+    },
+    "3:4": {
+      "claim": "Sam Altman promoted a now-shuttered Sora partnership with Disney this month.",
+      "label": "contradicted"
+    },
+    "3:5": {
+      "claim": "Sam Altman floated selling ads on ChatGPT this month.",
+      "label": "contradicted"
+    },
+    "3:6": {
+      "claim": "Sam Altman spoke on the \"Mostly Human\" podcast this month.",
+      "label": "supported"
+    },
+    "3:7": {
+      "claim": "Dario Amodei is Anthropic's CEO.",
+      "label": "supported"
+    },
+    "3:8": {
+      "claim": "Dario Amodei published a blog this month clarifying his stance on open-weight model bans.",
+      "label": "supported"
+    },
+    "4:0": {
+      "claim": "NVIDIA reported revenue of $96,221,000,000 for the quarter ending July 31, 2026.",
+      "label": "supported"
+    },
+    "5:0": {
+      "claim": "For the Fall 2002 cohort at Arizona State University, 30% of students graduated within four years according to older Department of Education/ASU data.",
+      "label": "supported"
+    },
+    "5:1": {
+      "claim": "For the Fall 2012 cohort at Arizona State University, 51.6% of students graduated within four years according to an ASU provost report.",
+      "label": "supported"
+    },
+    "5:2": {
+      "claim": "U.S. News reports that roughly 56% of Arizona State University students graduate within four years.",
+      "label": "supported"
+    },
+    "5:3": {
+      "claim": "CollegeRaptor reports that roughly 53% of Arizona State University students graduate within four years.",
+      "label": "supported"
+    },
+    "5:4": {
+      "claim": "Other summaries list that roughly 51\u201356% of Arizona State University students graduate within four years.",
+      "label": "supported"
+    },
+    "6:0": {
+      "claim": "Tavily's founder and CEO is Rotem Weiss.",
+      "label": "supported"
+    },
+    "6:1": {
+      "claim": "Rotem Weiss was a Columbia University student.",
+      "label": "supported"
+    },
+    "6:2": {
+      "claim": "Rotem Weiss completed a BA at Columbia University in 2024.",
+      "label": "supported"
+    },
+    "7:0": {
+      "claim": "Arizona State University's reported annual enrollment for 2025\u201326 is 203,700+.",
+      "label": "supported"
+    },
+    "7:1": {
+      "claim": "Arizona State University projected about 158,000 students enrolled at the start of fall 2026.",
+      "label": "supported"
+    },
+    "8:0": {
+      "claim": "Arizona State University was founded in 1885.",
+      "label": "supported"
+    },
+    "9:0": {
+      "claim": "The GPT series was developed by OpenAI.",
+      "label": "supported"
+    },
+    "9:1": {
+      "claim": "OpenAI is an American artificial intelligence company.",
+      "label": "supported"
+    },
+    "9:2": {
+      "claim": "OpenAI is an AI public benefit corporation.",
+      "label": "supported"
+    },
+    "9:3": {
+      "claim": "OpenAI is headquartered in San Francisco.",
+      "label": "supported"
+    }
+  }
+}

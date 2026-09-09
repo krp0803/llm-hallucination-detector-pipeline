@@ -19,6 +19,7 @@ and never reaches verify_claim().
 
 import asyncio
 import re
+from difflib import SequenceMatcher
 from functools import lru_cache
 
 from openai import AsyncOpenAI
@@ -29,14 +30,31 @@ from prompts import (
     DECOMPOSE_SYSTEM_PROMPT,
     VERIFY_SYSTEM_PROMPT,
     format_evidence,
+    source_text,
 )
 
 MODEL = "gpt-5-mini"
+
+# Separate from MODEL (used by decompose()) so verify_claim()'s model can
+# be tuned independently of the drafting model. Tested against the full
+# gpt-5 model as a diagnostic for the confirmed pronoun-resolution miss
+# (Stage 5): gpt-5 reached the identical verdict on the identical claim,
+# which is evidence the miss is genuine ambiguity in the source text, not
+# a gpt-5-mini capability gap -- so gpt-5-mini stays, at roughly 1/8th
+# the measured cost for the same accuracy on this eval set.
+VERIFY_MODEL = "gpt-5-mini"
 
 # Cost ceiling: verify_claim() below is one LLM call per claim, fanned
 # out concurrently. Without a cap, a sufficiently rambling draft could
 # turn one /ask request into an unbounded number of paid calls.
 MAX_CLAIMS = 25
+
+# Quote-matching tuning -- see _quote_is_present() for what these gate.
+# Both values were chosen empirically against the real Stage 4 labeled
+# dataset, not guessed: every confirmed-bad quote scored 1.000 coverage
+# once the haystack included the title, with wide margin above 0.9.
+QUOTE_MATCH_THRESHOLD = 0.9
+MIN_FUZZY_QUOTE_LENGTH = 20
 
 
 # -- Local response envelopes -------------------------------------------
@@ -92,6 +110,26 @@ def _normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip().lower()
 
 
+def _fuzzy_coverage(needle: str, haystack: str) -> float:
+    """
+    What fraction of `needle`'s characters can be matched, in order
+    (allowing gaps), somewhere in `haystack`.
+
+    Deliberately NOT SequenceMatcher.ratio(): ratio() is 2*matched /
+    (len(needle)+len(haystack)), which tanks for a short quote against a
+    long page purely because the page is long, not because the quote is
+    fake. Dividing by len(needle) alone measures the thing that actually
+    matters here -- how much of the (possibly short, possibly gappy)
+    quote is genuinely findable in the source -- independent of how much
+    other text surrounds it.
+    """
+    if not needle:
+        return 0.0
+    matcher = SequenceMatcher(None, needle, haystack, autojunk=False)
+    matched = sum(block.size for block in matcher.get_matching_blocks())
+    return matched / len(needle)
+
+
 def _quote_is_present(quote: str | None, evidence: list[SearchResult]) -> bool:
     """
     Mechanically check whether `quote` actually appears in the evidence,
@@ -100,17 +138,38 @@ def _quote_is_present(quote: str | None, evidence: list[SearchResult]) -> bool:
     made to cite a quote, but it can't be made to cite one that survives
     this check unless the quote is real.
 
-    Whitespace-collapsed, case-insensitive substring search. Deliberately
-    strict -- a quote the model lightly paraphrases or joins with an
-    ellipsis will fail this check even if the underlying claim is fine.
-    That's a false-negative bias on purpose: better to under-credit a
-    real quote than to wave through a fabricated one. Loosening this
-    (e.g. fuzzy matching) is a Stage 4 tuning knob, not a Stage 3 concern.
+    Checked against source_text() -- title, url, AND content -- not just
+    content alone. A Stage 4 measurement found the auditor flagging a
+    perfectly good claim because the model quoted a source's title
+    (which format_evidence() shows it) and the checker only ever searched
+    the body text, so the citation could never be found.
+
+    Below MIN_FUZZY_QUOTE_LENGTH, falls back to an exact whitespace-
+    normalized substring check -- fuzzy coverage is meaningless for a
+    very short quote (a handful of characters can trivially "cover"
+    almost anything), so this floor exists specifically so the fix below
+    doesn't introduce a new way to rubber-stamp a fabricated citation.
+
+    At or above that length, use fuzzy coverage (see _fuzzy_coverage())
+    rather than an exact contiguous substring. Stage 4 found two real
+    but non-exact quotes get unfairly flagged this way: one skipped a
+    row in a table (splicing two real, non-adjacent lines together), one
+    silently dropped a few words mid-sentence with no ellipsis. In both
+    cases every character the model quoted was real and in the right
+    order -- just not perfectly contiguous -- so coverage scores 1.0
+    while a strict substring check scores 0. QUOTE_MATCH_THRESHOLD=0.9
+    was chosen with margin: every confirmed-good case scores 1.000, and
+    the confirmed-bad case (checked without the title fix) scored 0.589.
     """
     if not quote:
         return False
     needle = _normalize(quote)
-    return any(needle in _normalize(result.content) for result in evidence)
+    if len(needle) < MIN_FUZZY_QUOTE_LENGTH:
+        return any(needle in _normalize(source_text(result)) for result in evidence)
+    return any(
+        _fuzzy_coverage(needle, _normalize(source_text(result))) >= QUOTE_MATCH_THRESHOLD
+        for result in evidence
+    )
 
 
 async def decompose(question: str, draft: str) -> list[str]:
@@ -155,7 +214,7 @@ async def verify_claim(claim: str, evidence: list[SearchResult]) -> ClaimCheck:
     """
     user_input = f"Claim: {claim}\n\nSearch results:\n{format_evidence(evidence)}"
     response = await _openai().responses.parse(
-        model=MODEL,
+        model=VERIFY_MODEL,
         instructions=VERIFY_SYSTEM_PROMPT,
         input=user_input,
         text_format=VerificationResult,

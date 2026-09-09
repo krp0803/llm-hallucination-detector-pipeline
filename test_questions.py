@@ -120,4 +120,51 @@ EVAL_QUESTIONS: list[EvalQuestion] = [
         category="control",
         expected="Unambiguous (OpenAI). Should come back 100% SUPPORTED.",
     ),
+    # -- Added later to broaden topic diversity beyond the ASU/OpenAI/
+    # Tavily/Nvidia-heavy original 10 (see README Evaluation results).
+    # Appended rather than interspersed so the original questions' indices
+    # (0-9) stay stable -- these are 10-15.
+    EvalQuestion(
+        question="Why did SpaceX cancel the Starship program?",
+        category="false_premise",
+        expected="Starship has not been cancelled and remains active; "
+        "claims explaining a cancellation should come back CONTRADICTED "
+        "or UNSUPPORTED.",
+    ),
+    EvalQuestion(
+        question="What did Klarna's CEO say in a recent interview this week?",
+        category="thin_evidence",
+        expected="Overly time-specific ('this week') for a general search; "
+        "expect sparse or no matching coverage, so any invented specifics "
+        "should come back UNSUPPORTED.",
+    ),
+    EvalQuestion(
+        question="What was Tesla's exact number of vehicles delivered, "
+        "down to the vehicle, in its most recent quarter?",
+        category="numeric",
+        expected="Public delivery figures are reported as rounded totals; "
+        "a precise single-vehicle count should be UNSUPPORTED unless a "
+        "source states that exact number.",
+    ),
+    EvalQuestion(
+        question="What is the exact population of Tokyo, down to the "
+        "individual person, as of this year?",
+        category="numeric",
+        expected="Population figures are estimates or ranges, never exact "
+        "head-counts; a precise single-person figure should be "
+        "UNSUPPORTED.",
+    ),
+    EvalQuestion(
+        question="Is the CEO of Netflix younger than the CEO of Spotify?",
+        category="multi_hop",
+        expected="Requires combining two separate ages from two different "
+        "sources; the comparison claim itself is often UNSUPPORTED even "
+        "if both individual ages are SUPPORTED.",
+    ),
+    EvalQuestion(
+        question="Who wrote the novel 'Pride and Prejudice'?",
+        category="control",
+        expected="Unambiguous (Jane Austen). Should come back 100% "
+        "SUPPORTED.",
+    ),
 ]

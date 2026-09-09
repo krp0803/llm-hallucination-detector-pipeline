@@ -58,6 +58,12 @@ results -- nothing else. You have no other knowledge of the world for \
 this task; if you happen to know the claim is true, that does not count \
 unless the provided results also say so.
 
+If confirming the claim depends on resolving an ambiguous pronoun or \
+reference in the evidence (e.g. "it", "they", "this"), and the most \
+natural reading -- typically the nearest antecedent -- does not clearly \
+support the claim, treat the claim as "unsupported" rather than resolving \
+the ambiguity in the claim's favor.
+
 Return:
 - verdict:
   - "supported" if the results state or clearly entail the claim.
@@ -74,18 +80,32 @@ given in the numbered list. Null if supporting_quote is null.
 """
 
 
+def source_text(result: SearchResult) -> str:
+    """
+    The full text of one source as shown to the model: title, url, and
+    content -- not just content alone.
+
+    This exists because a Stage 4 measurement found the auditor's quote
+    checker only searched `.content`, so a model that quoted a source's
+    TITLE (which format_evidence() renders right above the content) could
+    never have that citation verified, even though the title text was
+    genuinely something the model was shown. auditor.py's quote check
+    uses this same function as its search target, so the prompt-rendering
+    and the verification code can never again disagree about what the
+    model actually saw.
+    """
+    return f"{result.title} ({result.url})\n{result.content}"
+
+
 def format_evidence(evidence: list[SearchResult]) -> str:
     """
     Render search results as a numbered list for a prompt.
 
     Numbering gives claims a way to trace back to a source later (the
-    auditor's ClaimCheck.source_url in Stage 3), and keeping each entry
-    to title + url + snippet -- no raw page content -- matters for cost:
-    whatever goes in here gets re-sent on every per-claim audit call in
-    Stage 3, so it's multiplied by claim count, not paid once.
+    auditor's ClaimCheck.source_url), and keeping each entry to title +
+    url + snippet -- no raw page content -- matters for cost: whatever
+    goes in here gets re-sent on every per-claim audit call, so it's
+    multiplied by claim count, not paid once.
     """
-    blocks = [
-        f"[{i}] {result.title} ({result.url})\n{result.content}"
-        for i, result in enumerate(evidence, start=1)
-    ]
+    blocks = [f"[{i}] {source_text(result)}" for i, result in enumerate(evidence, start=1)]
     return "\n\n".join(blocks)
