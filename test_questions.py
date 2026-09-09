@@ -3,11 +3,16 @@ Adversarial eval set for the Claim Auditor pipeline.
 
 This is an eval set, not a unit test suite -- there's no single "correct"
 string to assert equality against. Each question is chosen to provoke a
-specific failure mode, and "success" means the auditor's verdicts match
-the `expected` column below once Stage 2/3 are wired up. This is the
-direct continuation of the ground-truth-checking work from Mercor: there,
-checking was manual; here, the auditor automates it and this file is the
-adversarial test harness for the auditor itself.
+specific failure mode. This is the direct continuation of the
+ground-truth-checking work from Mercor: there, checking was manual; here,
+the auditor automates it and this file is the adversarial test harness
+for the auditor itself.
+
+Pure data, deliberately -- the runner that executes these questions
+against the live pipeline lives in evaluate.py, and the hand-labeling
+tool that turns a run into scored ground truth lives in label.py. Keeping
+this file free of any code that touches agent.py/auditor.py means
+`from test_questions import EVAL_QUESTIONS` never has a side effect.
 
 Categories, and why each one is in here:
 
@@ -116,42 +121,3 @@ EVAL_QUESTIONS: list[EvalQuestion] = [
         expected="Unambiguous (OpenAI). Should come back 100% SUPPORTED.",
     ),
 ]
-
-
-async def run_eval() -> None:
-    """
-    Run every question in EVAL_QUESTIONS through the full pipeline and
-    print each verdict next to its `expected` note for manual comparison.
-
-    Deliberately not asserting pass/fail here -- "expected" is a
-    prediction about verdict category, not an exact string, so grading is
-    eyeballed for now. Stage 4 tightens this into real precision/recall
-    numbers once agent.py and auditor.py have real logic behind them.
-    """
-    from agent import run_agent
-    from auditor import audit
-
-    for eval_q in EVAL_QUESTIONS:
-        print(f"\n=== [{eval_q.category}] {eval_q.question}")
-        print(f"    expected: {eval_q.expected}")
-
-        agent_result = await run_agent(eval_q.question)
-        report = await audit(agent_result)
-
-        for check in report.checks:
-            print(f"    - [{check.verdict.value}] {check.claim}")
-
-
-if __name__ == "__main__":
-    import asyncio
-
-    from dotenv import load_dotenv
-
-    # This is a direct entry point (`python test_questions.py`), so it
-    # loads its own env -- same rule as main.py: entry points configure
-    # the environment, library modules (agent.py, auditor.py) just
-    # consume it. Kept inside __main__, not at module top, so importing
-    # this file for its EVAL_QUESTIONS list elsewhere never has a side
-    # effect of touching the environment.
-    load_dotenv()
-    asyncio.run(run_eval())
