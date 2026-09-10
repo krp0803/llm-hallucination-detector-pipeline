@@ -24,7 +24,7 @@ from auditor import audit  # noqa: E402
 from models import AskRequest, AskResponse  # noqa: E402
 
 app = FastAPI(
-    title="Claim Auditor",
+    title="LLM Hallucination Detection Pipeline",
     description="Two-pass pipeline that catches hallucinations in agent output.",
 )
 

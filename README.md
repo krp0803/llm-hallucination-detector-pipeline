@@ -1,4 +1,6 @@
-# Claim Auditor
+# LLM Hallucination Detection Pipeline
+
+*Formerly called Claim Auditor.*
 
 A two-pass AI pipeline that catches hallucinations in agent output before they
 reach the user. One pass drafts an answer from live web search; a second,
