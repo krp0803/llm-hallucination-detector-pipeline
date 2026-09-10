@@ -11,13 +11,19 @@ don't actually support.
 **Status:** Stages 1–5 complete. The pipeline works end-to-end and has been
 measured, fixed, and remeasured against a hand-labeled adversarial eval set,
 then confirmed against an expanded, more topically diverse set (see
-[Evaluation results](#evaluation-results) below): precision 0.29 → 0.62 and
-F1 0.33 → 0.59 across 70 claims on the current code, after fixing 3 confirmed
-quote-checker bugs. One real limitation remains and is now well-understood
-rather than mysterious: the auditor's question-blind design cannot catch a
-true claim being used to support a false premise (0.00 recall on
-`false_premise`, confirmed consistent across 18 claims in two independently
-built question sets) — a documented architectural tradeoff, not a bug.
+[Evaluation results](#evaluation-results) below).
+
+**Bottom line, on 70 hand-labeled claims:** the pipeline roughly halves the
+hallucination rate of the answer that reaches the user — **13% → 6%** — while
+keeping **95%** of genuinely correct claims. In detector terms, precision
+0.29 → 0.62 and F1 0.33 → 0.59 on the current code, after fixing 3 confirmed
+quote-checker bugs.
+
+One real limitation remains and is now well-understood rather than
+mysterious: the auditor's question-blind design cannot catch a true claim
+being used to support a false premise (0.00 recall on `false_premise`,
+confirmed consistent across 18 claims in two independently built question
+sets) — a documented architectural tradeoff, not a bug.
 
 ## Why this exists
 
@@ -293,6 +299,28 @@ category that got worse under more data, converging to a clean 0.00/0.00
 across all 18 of its claims — consistent enough across two independently
 built question sets to be a real property of the system, not noise from
 one unlucky question. See below for why.
+
+### What this means in plain terms
+
+Precision and recall are the rigorous framing. The plainest statement of
+what the pipeline does for a user, from the same 70-claim confusion matrix:
+
+- **Raw agent draft, no auditing:** 9 of 70 claims aren't supported by the
+  retrieved evidence → **13% hallucination rate** in what the agent hands over.
+- **After the auditor removes what it flags:** of the 62 claims that survive
+  into the final answer, 4 are still unsupported → **6% hallucination rate**
+  in what actually reaches the user. Roughly a 50% cut.
+
+The cost of that filtering: **95% of genuinely correct claims survive** — the
+auditor wrongly strips about 1 in 20 good claims as collateral (the 3 false
+positives above). And 6% isn't 0%: recall is 0.56, so a bit under half of
+real hallucinations still get through, nearly all of them the `false_premise`
+case described next.
+
+This is the number that maps to the project's actual goal — cutting
+hallucination in a delivered answer — rather than an abstract detector score.
+It's 70 hand-labeled claims, a small sample, stated as such rather than
+hidden behind a percentage.
 
 ### Why false_premise recall is stuck at 0.00
 
